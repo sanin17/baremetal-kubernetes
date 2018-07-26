@@ -1,0 +1,48 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: echoserver
+  namespace: default
+spec:
+  replicas: 4
+  template:
+    metadata:
+      labels:
+        app: echoserver
+    spec:
+      containers:
+      - image: gcr.io/google_containers/echoserver:1.0
+        imagePullPolicy: Always
+        name: echoserver
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echoserver
+  namespace: default
+spec:
+  ports:
+  - port: 8080
+  selector:
+    app: echoserver
+---
+apiVersion: voyager.appscode.com/v1beta1
+kind: Ingress
+metadata:
+  name: echoserveringress
+  namespace: default
+  annotations:
+    ingress.appscode.com/type: HostPort
+spec:
+  rules:
+  # CHANGE ME
+  - host: myloadbalancer.domain
+    http:
+      port: 8181
+      paths:
+      - path: /
+        backend:
+          serviceName: echoserver
+          servicePort: 8080
